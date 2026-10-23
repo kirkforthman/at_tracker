@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>CONUS Dashboard</title>
+<style>
+  /* ---------- Tweak knobs ---------- */
+  :root {
+    --bg: #353a42;
+    --panel: #3f454e;
+    --panel-2: #4a515b;        /* raised surfaces: HUD, bubbles, inputs */
+    --border: #6b737e;
+    --border-soft: #59616b;
+    --line: #535a64;           /* field dividers */
+    --text: #eef0f3;
+    --muted: #b5bbc4;
+    --ocean: #3b4859;
+    --land: #4d545e;
+    --land-hover: #565e69;
+    --land-other: #424850;
+    --land-other-line: #525963;
+    --state-line: #7e8792;
+    --airport: #eceff2;
+    --marker-edge: #2a2f36;
+    --plane-ground: #ef6a63;
+    --plane-flight: #6fd189;
+    --select: #93bfff;
+    --overlay: rgba(63, 69, 78, .9);
+    --user-bubble: #4a5a72;
+    --user-bubble-line: #607391;
+    --radius: 8px;
+    --gap: 18px;
+    --chat-width: 340px;
+    --readout-height: 190px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--font); color: var(--text); background: var(--bg);
+    padding: var(--gap); overflow: hidden;
+  }
+
+  /* ---------- Layout ---------- */
+  .app {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr var(--chat-width);
+    grid-template-rows: 1fr var(--readout-height);
+    grid-template-areas:
+      "map  chat"
+      "read chat";
+    gap: var(--gap);
+  }
+  .panel {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    min-width: 0; min-height: 0;
+  }
+  .map-panel  { grid-area: map; }
+  .read-panel { grid-area: read; border-width: 1.5px; border-color: var(--border-soft); }
+  .chat-panel { grid-area: chat; display: flex; flex-direction: column; }
+
+  /* ---------- Map ---------- */
+  .map-panel svg { width: 100%; height: 100%; display: block; background: var(--ocean); cursor: grab; }
+  .map-panel svg:active { cursor: grabbing; }
+  .world { fill: var(--land-other); stroke: var(--land-other-line); stroke-width: 0.8px; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .state { fill: var(--land); stroke: var(--state-line); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+  .state:hover { fill: var(--land-hover); }
+  .airport circle { fill: var(--panel); stroke: var(--airport); stroke-width: 1.4; cursor: pointer; }
+  .airport text { font-size: 11px; font-weight: 600; fill: var(--airport); pointer-events: none;
+                  paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+  .airport.selected circle { stroke: var(--select); stroke-width: 2.5; }
+  .plane { cursor: pointer; }
+  .plane polygon { stroke: var(--marker-edge); stroke-width: 1; }
+  .plane.ground polygon { fill: var(--plane-ground); }
+  .plane.flight polygon { fill: var(--plane-flight); }
+  .plane.selected .halo { fill: none; stroke: var(--select); stroke-width: 2; }
+  .plane .halo { display: none; }
+  .plane.selected .halo { display: block; }
+  .route { fill: none; stroke: var(--select); stroke-width: 1.2px; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; pointer-events: none; }
+
+  .map-hud {
+    position: absolute; left: 16px; bottom: 14px;
+    display: flex; gap: 10px; align-items: center;
+    font-size: 12px; color: var(--muted);
+    background: var(--overlay); border: 1px solid var(--border-soft);
+    border-radius: 6px; padding: 6px 10px; user-select: none;
+  }
+  .map-hud button, .chat-panel button {
+    font: inherit; border: 1px solid var(--border-soft); background: var(--panel-2); color: var(--text);
+    border-radius: 5px; padding: 3px 8px; cursor: pointer;
+  }
+  .filters {
+    position: absolute; left: 16px; top: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+    font-size: 12px; color: var(--muted);
+    background: var(--overlay); border: 1px solid var(--border-soft);
+    border-radius: 6px; padding: 8px 10px; user-select: none;
+  }
+  .filters label { display: flex; flex-direction: column; gap: 3px; }
+  .filters select {
+    font: 13px var(--font); color: var(--text); min-width: 150px;
+    border: 1px solid var(--border-soft); border-radius: 5px; padding: 3px 6px; background: var(--panel-2);
+  }
+  .legend {
+    position: absolute; right: 16px; bottom: 14px;
+    font-size: 12px; background: var(--overlay);
+    border: 1px solid var(--border-soft); border-radius: 6px; padding: 6px 10px;
+    display: flex; gap: 14px; user-select: none;
+  }
+  .legend .sw { display: inline-block; width: 11px; height: 11px; clip-path: polygon(50% 0, 100% 100%, 0 100%); margin-right: 6px; vertical-align: -1px; }
+  .legend .g { background: var(--plane-ground); }
+  .legend .f { background: var(--plane-flight); }
+  .legend .a { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--airport); clip-path: none; }
+  .picker {
+    position: absolute; z-index: 5; display: none; min-width: 190px;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35); font-size: 13px; overflow: hidden;
+  }
+  .picker .ph { padding: 6px 10px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border-soft); }
+  .picker .pi { display: flex; gap: 10px; align-items: center; padding: 6px 10px; cursor: pointer; }
+  .picker .pi:hover { background: var(--border-soft); }
+  .picker .pi.active { color: var(--select); }
+  .picker .pi .cs { font-family: var(--mono); font-weight: 600; min-width: 70px; }
+  .picker .pi .meta { color: var(--muted); }
+  .picker .sw { width: 9px; height: 9px; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: var(--plane-ground); flex: none; }
+  .tip {
+    position: absolute; pointer-events: none; display: none;
+    font: 12px var(--mono); background: #22262c; color: #f0f2f4; border: 1px solid var(--border-soft);
+    padding: 4px 7px; border-radius: 6px; transform: translate(12px, -24px); white-space: nowrap;
+  }
+
+  /* ---------- Readout ---------- */
+  .read-panel { padding: 14px 22px; }
+  .read-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+  .read-head h2 { margin: 0; font-size: 19px; font-weight: 600; }
+  .read-head .sub { color: var(--muted); font-size: 15px; }
+  .read-head .badge { font-size: 13px; padding: 2px 10px; border-radius: 999px; color: #fff; }
+  .badge.ground { background: var(--plane-ground); color: #22262c; }
+  .badge.flight { background: var(--plane-flight); color: #22262c; }
+  .badge.airport { background: var(--airport); color: #22262c; }
+  .fields {
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 18px;
+  }
+  .field { border-top: 1px solid var(--line); padding-top: 6px; min-width: 0; }
+  .field .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .field .v { font: 14px var(--mono); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .read-empty { color: var(--muted); font-size: 14px; display: grid; place-items: center; height: 100%; }
+
+  /* ---------- Chat ---------- */
+  .chat-head { padding: 16px 20px 8px; font-weight: 600; font-size: 14px; }
+  .chat-log { flex: 1; overflow-y: auto; padding: 6px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 90%; padding: 8px 11px; border-radius: 8px; font-size: 13px; line-height: 1.35; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--user-bubble); border: 1px solid var(--user-bubble-line); }
+  .msg.bot  { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--border-soft); }
+  .msg.sys  { align-self: center; color: var(--muted); font-size: 12px; background: none; }
+  .msg a { color: var(--select); cursor: pointer; text-decoration: underline; }
+  .chat-form { padding: 10px 16px 16px; }
+  .chat-input {
+    display: flex; align-items: center; border: 2px solid var(--border); border-radius: calc(var(--radius) - 2px);
+    padding: 6px 6px 6px 12px; gap: 8px; background: var(--panel-2);
+  }
+  .chat-input input { flex: 1; border: 0; outline: 0; font: 15px var(--font); background: transparent; color: var(--text); min-width: 0; }
+  .chat-input input::placeholder { color: var(--muted); }
+  .chat-input button.send {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border);
+    background: var(--panel-2); color: var(--text); display: grid; place-items: center; padding: 0;
+  }
+  .chat-input button.send:hover { background: var(--border-soft); }
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="panel map-panel" id="mapPanel">
+    <svg id="map"></svg>
+    <div class="filters">
+      <label>Status
+        <select id="fStatus">
+          <option value="">All</option>
+          <option value="flight">In flight</option>
+          <option value="ground">On ground</option>
+        </select>
+      </label>
+      <label>Airline
+        <select id="fAirline"><option value="">All</option></select>
+      </label>
+    </div>
+    <div class="map-hud">
+      <span id="zoomLabel">zoom 1.0×</span>
+      <button id="resetView" title="Reset view">reset</button>
+      <label><input type="checkbox" id="motion" checked> motion</label>
+      <span id="counts"></span>
+    </div>
+    <div class="legend">
+      <span><span class="sw g"></span>on ground</span>
+      <span><span class="sw f"></span>in flight</span>
+      <span><span class="sw a"></span>airport</span>
+    </div>
+    <div class="picker" id="picker"></div>
+    <div class="tip" id="tip"></div>
+  </section>
+
+  <section class="panel read-panel" id="readout">
+    <div class="read-empty">Click an aircraft or airport on the map to see its data here.</div>
+  </section>
+
+  <aside class="panel chat-panel">
+    <div class="chat-head">Chat</div>
+    <div class="chat-log" id="chatLog"></div>
+    <form class="chat-form" id="chatForm" autocomplete="off">
+      <div class="chat-input">
+        <input id="chatText" placeholder="chat query entry" />
+        <button class="send" type="submit" title="Send" aria-label="Send">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M4 7l4-4 4 4"/></svg>
+        </button>
+      </div>
+    </form>
+  </aside>
+</div>
+
+<script src="{{ url_for('static', filename='vendor/d3.v7.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/topojson-client.min.js') }}"></script>
+<script>
+  window.API = {
+    states: "{{ url_for('static', filename='geo/states.json') }}",
+    land: "{{ url_for('static', filename='geo/land.json') }}",
+    airports: "{{ url_for('api_airports') }}",
+    airlines: "{{ url_for('api_airlines') }}",
+    aircraft: "{{ url_for('api_aircraft') }}",
+    motion: "{{ url_for('api_motion') }}",
+    chat: "{{ url_for('api_chat') }}"
+  };
+</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

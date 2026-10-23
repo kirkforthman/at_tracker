@@ -12,6 +12,8 @@
   const TICK_MS = 1000;       // how often to extrapolate airborne positions between polls
   const EXTRAPOLATE_MAX_S = 180;  // never dead-reckon further than this from the last report
   const STACK_PX = 8;         // planes closer than this on screen open the picker
+  const AIRPORT_HIT_PX = 12;  // invisible click radius around an airport dot, screen px
+  const AIRPORT_PICK_PX = 8;  // clicking a plane this close to an airport also offers the airport
   const NEAR_AIRPORT_KM = 40; // airport readout counts aircraft within this radius
   const FRESH_WARN_S = 180, FRESH_STALE_S = 600;  // freshness badge thresholds
   const PERF = new URLSearchParams(location.search).has("perf");  // ?perf logs render times
@@ -130,12 +132,14 @@
       enter => {
         const g = enter.append("g").attr("class", "airport").on("click", (ev, d) => { ev.stopPropagation(); select({ kind: "airport", data: d }); })
           .on("mousemove", (ev, d) => showTip(ev, `${d[0]} · ${d[1]}`)).on("mouseleave", hideTip);
-        g.append("circle"); g.append("text").attr("dy", -6).attr("text-anchor", "middle").text(d => d[0]);
+        g.append("circle").attr("class", "hit").attr("r", AIRPORT_HIT_PX);
+        g.append("circle").attr("class", "dot");
+        g.append("text").attr("dy", -6).attr("text-anchor", "middle").text(d => d[0]);
         return g;
       })
       .attr("transform", d => `translate(${d.xy[0]},${d.xy[1]}) scale(${1 / k})`)
       .classed("selected", d => selected && selected.kind === "airport" && selected.data === d)
-      .select("circle").attr("r", AIRPORT_R);
+      .select("circle.dot").attr("r", AIRPORT_R);
     gAirports.selectAll("text").style("display", showLabels ? null : "none");
 
     const s = PLANE_SIZE;
@@ -169,17 +173,29 @@
 
   // ---------- Stacked-aircraft picker ----------
   // Planes drawn within STACK_PX of the clicked one (e.g. parked at the same airport) open a picker.
+  // If the click is also on an airport, the airport is offered too: parked planes often cover its dot.
   const picker = document.getElementById("picker");
   function hidePicker() { picker.style.display = "none"; }
+  const screenDist = (xy, cx, cy) => { const [x, y] = transform.apply(xy); return Math.hypot(x - cx, y - cy); };
+  function airportAt(cx, cy, px) {
+    let best = null, bestD = px;
+    for (const a of AIRPORTS) { const dd = screenDist(a.xy, cx, cy); if (dd <= bestD) { best = a; bestD = dd; } }
+    return best;
+  }
   function onPlaneClick(ev, d) {
     const [cx, cy] = transform.apply(planeXY(d));
-    const stack = AIRCRAFT.filter(p => visible(p) && (p === d || Math.hypot(...transform.apply(planeXY(p)).map((v, i) => v - [cx, cy][i])) <= STACK_PX));
-    if (stack.length < 2) { hidePicker(); select({ kind: "aircraft", data: d }); return; }
+    const stack = AIRCRAFT.filter(p => visible(p) && (p === d || screenDist(planeXY(p), cx, cy) <= STACK_PX));
     const r = panel.getBoundingClientRect();
-    picker.innerHTML = `<div class="ph">${stack.length} aircraft here</div>` + stack.map(p =>
-      `<div class="pi${selected && selected.data === p ? " active" : ""}" data-id="${p.id}"><span class="sw"></span><span class="cs">${p.callsign}</span><span class="meta">${p.status === "flight" ? "FL" + Math.round(p.alt / 100) : "on ground"} · ${p.icao24}</span></div>`).join("");
+    const apt = airportAt(ev.clientX - r.left, ev.clientY - r.top, AIRPORT_PICK_PX);
+    if (stack.length < 2 && !apt) { hidePicker(); select({ kind: "aircraft", data: d }); return; }
+    const isSel = (o) => selected && selected.data === o ? " active" : "";
+    picker.innerHTML = `<div class="ph">${stack.length} aircraft${apt ? " at " + apt[0] : " here"}</div>` +
+      (apt ? `<div class="pi${isSel(apt)}" data-airport="${apt[0]}"><span class="sw apt"></span><span class="cs">${apt[0]}</span><span class="meta">airport · ${apt[1]}</span></div>` : "") +
+      stack.map(p =>
+      `<div class="pi${isSel(p)}" data-id="${p.id}"><span class="sw ${p.status}"></span><span class="cs">${p.callsign}</span><span class="meta">${p.status === "flight" ? "FL" + Math.round(p.alt / 100) : "on ground"} · ${p.icao24}</span></div>`).join("");
     picker.querySelectorAll(".pi").forEach(el => el.addEventListener("click", (e) => {
-      e.stopPropagation(); hidePicker(); select({ kind: "aircraft", data: acById.get(el.dataset.id) });
+      e.stopPropagation(); hidePicker();
+      select(el.dataset.airport ? { kind: "airport", data: apByCode[el.dataset.airport] } : { kind: "aircraft", data: acById.get(el.dataset.id) });
     }));
     picker.style.display = "block";
     let x = ev.clientX - r.left + 10, y = ev.clientY - r.top + 10;

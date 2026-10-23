@@ -26,10 +26,13 @@ Portfolio project: deterministic ingest + relational/graph data, agentic chat ov
 - OpenSky budget: 4,000 credits/day, 4 credits per CONUS call, poll every 90 s. Don't add calls
   without checking the budget.
 - Never commit `.env` or real credentials.
+- **Pin known-good versions** (docs/adr/0003): `==` Python deps in `requirements.txt`, action SHAs,
+  image `tag@sha256:digest`, model revision + SHA-256. Bumps come through Dependabot PRs.
+- `main` is protected: work on a branch and open a PR; CI must pass before merging.
 
 ## Commands
 
-    cd ingest && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+    cd ingest && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/pip install --no-deps -e .
     .venv/bin/pytest -q && .venv/bin/ruff check .
     .venv/bin/python -m at_ingest.probe all          # real responses -> ingest/recordings/ (gitignored)
     .venv/bin/python tests/fixtures/generate_synthetic.py   # regenerate synthetic fixtures

@@ -25,3 +25,8 @@ Short dated entries: what was done, what the agent got wrong, what was corrected
   (rotation with turn + callsign change, first-seen-in-cruise, coverage gap, landing lost on
   final). The probe now writes real responses to gitignored `ingest/recordings/`. The unpushed P0
   commit was amended so recorded data never enters the published history.
+- P0 close-out: public repo with CI and branch protection on `main`. Pinned known-good
+  versions (ADR 0003): exact Python deps, CI actions by commit SHA, Python 3.14.4 in CI, and the
+  tested llama.cpp build (b11804, digest recorded) and model revision + SHA-256, to be applied
+  in compose.yaml in P1. Dependabot proposes monthly bumps. Allowlist: added KAP (Cape Air)
+  and JSX after reviewing unmatched prefixes. **P0 complete.**

@@ -85,7 +85,10 @@
   .plane.selected .halo { fill: none; stroke: var(--select); stroke-width: 2; }
   .plane .halo { display: none; }
   .plane.selected .halo { display: block; }
-  .route { fill: none; stroke: var(--select); stroke-width: 1.2px; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .fresh { padding: 1px 7px; border-radius: 999px; color: #22262c; }
+  .fresh.ok { background: var(--plane-flight); }
+  .fresh.warn { background: #f0c24b; }
+  .fresh.stale { background: var(--plane-ground); }
 
   .map-hud {
     position: absolute; left: 16px; bottom: 14px;
@@ -196,7 +199,8 @@
     <div class="map-hud">
       <span id="zoomLabel">zoom 1.0×</span>
       <button id="resetView" title="Reset view">reset</button>
-      <label><input type="checkbox" id="motion" checked> motion</label>
+      <label><input type="checkbox" id="pause"> pause</label>
+      <span id="fresh" class="fresh">no data yet</span>
       <span id="counts"></span>
     </div>
     <div class="legend">
@@ -235,7 +239,6 @@
     airports: "{{ url_for('api_airports') }}",
     airlines: "{{ url_for('api_airlines') }}",
     aircraft: "{{ url_for('api_aircraft') }}",
-    motion: "{{ url_for('api_motion') }}",
     chat: "{{ url_for('api_chat') }}"
   };
 </script>

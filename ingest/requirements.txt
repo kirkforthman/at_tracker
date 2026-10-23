@@ -1,15 +1,10 @@
-# Exact, known-good versions (runtime + dev) for the ingest package. See docs/adr/0003.
-# pyproject.toml keeps the compatible ranges; installs pin through this file:
-#   pip install -r requirements.txt && pip install --no-deps -e .
+# Exact, known-good runtime versions for the ingest worker. See docs/adr/0003.
+# Dev tools are in requirements-dev.txt. pyproject.toml keeps compatible ranges.
 certifi==2026.10.23
 charset-normalizer==3.5.2
 idna==3.20
-iniconfig==2.3.1
-packaging==26.3
-pluggy==1.7.0
-Pygments==2.21.0
-pytest==9.1.1
+psycopg==3.3.6
+psycopg-binary==3.3.6
 python-dotenv==1.2.4
 requests==2.34.2
-ruff==0.17.2
 urllib3==2.8.0

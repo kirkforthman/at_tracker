@@ -1,0 +1,95 @@
+# at_tracker services. Images pinned by tag + digest (docs/adr/0003); config from .env.
+#
+#   docker compose up -d --build                      # postgres + ingest + dashboard
+#   docker compose --profile gpu-nvidia up -d         # ...plus the local LLM (NVIDIA GPU)
+#   INGEST_SOURCE=replay docker compose up -d         # synthetic data, no OpenSky calls
+#
+# Ports are bound to 127.0.0.1 only. Postgres data and model weights live in named volumes.
+
+x-db-env: &db-env
+  POSTGRES_HOST: postgres
+  POSTGRES_USER: ${POSTGRES_USER:-at_tracker}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-at_tracker}
+  POSTGRES_DB: ${POSTGRES_DB:-at_tracker}
+
+services:
+  postgres:
+    image: postgres:18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-at_tracker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-at_tracker}
+      POSTGRES_DB: ${POSTGRES_DB:-at_tracker}
+    volumes:
+      - pgdata:/var/lib/postgresql   # Postgres 18 images keep data in a versioned subdirectory
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  ingest:
+    build: ./ingest
+    environment:
+      <<: *db-env
+      INGEST_SOURCE: ${INGEST_SOURCE:-opensky}
+      POLL_INTERVAL_S: ${POLL_INTERVAL_S:-90}
+      CREDIT_RESERVE: ${CREDIT_RESERVE:-40}
+      OPENSKY_CLIENT_ID: ${OPENSKY_CLIENT_ID:-}
+      OPENSKY_CLIENT_SECRET: ${OPENSKY_CLIENT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    environment:
+      <<: *db-env
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---- Local LLM (profile gpu-nvidia). Elsewhere, point LLM_BASE_URL at any OpenAI-compatible server.
+  llm-model:
+    profiles: [gpu-nvidia]
+    image: python:3.14.4-slim@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727
+    command: ["python", "/fetch_model.py"]
+    environment:
+      MODEL_URL: https://huggingface.co/ggml-org/gpt-oss-20b-GGUF/resolve/15dcfc7e7c608c6161507211ed43c5b590801b4b/gpt-oss-20b-MXFP4.gguf
+      MODEL_SHA256: 27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901
+      MODEL_PATH: /models/gpt-oss-20b-MXFP4.gguf
+    volumes:
+      - ./scripts/fetch_model.py:/fetch_model.py:ro
+      - llm-models:/models
+
+  llm:
+    profiles: [gpu-nvidia]
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda-b11804@sha256:490d8cd8000203a3ab8fdfce14ef931e2aa85affd4dd4447bcc75f299f00fd9a
+    command: ["-m", "/models/gpt-oss-20b-MXFP4.gguf", "--jinja", "-ngl", "99", "--n-cpu-moe", "6",
+              "-c", "16384", "--host", "0.0.0.0", "--port", "8080"]
+    volumes:
+      - llm-models:/models:ro
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      llm-model:
+        condition: service_completed_successfully
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  llm-models:
+    name: at-llm-models   # reuses the P0 download; fetch_model.py links it after verifying the hash

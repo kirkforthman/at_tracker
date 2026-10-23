@@ -2,20 +2,46 @@ name: ci
 
 on:
   push:
+    branches: [main]   # PR branches are covered by pull_request; avoids running twice per PR
   pull_request:
 
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ingest
+    services:
+      postgres:
+        image: postgres:18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
+        env:
+          POSTGRES_USER: at_tracker
+          POSTGRES_PASSWORD: at_tracker
+          POSTGRES_DB: at_tracker
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U at_tracker" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://at_tracker:at_tracker@localhost:5432/at_tracker
     steps:
       # Actions pinned to commit SHAs (tags can be moved); versions in comments. See docs/adr/0003.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: "3.14.4"
-      - run: pip install -r requirements.txt && pip install --no-deps -e .
-      - run: ruff check .
-      - run: pytest -q
+      - working-directory: ingest
+        run: pip install -r requirements-dev.txt && pip install --no-deps -e .
+      - run: ruff check ingest dashboard scripts
+      - working-directory: ingest
+        run: pytest -q
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    env:
+      INGEST_SOURCE: replay
+      POLL_INTERVAL_S: "2"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - run: docker compose up -d --build
+      - run: python3 scripts/compose_smoke.py
+      - if: always()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down -v

@@ -30,3 +30,13 @@ Short dated entries: what was done, what the agent got wrong, what was corrected
   tested llama.cpp build (b11804, digest recorded) and model revision + SHA-256, to be applied
   in compose.yaml in P1. Dependabot proposes monthly bumps. Allowlist: added KAP (Cape Air)
   and JSX after reviewing unmatched prefixes. **P0 complete.**
+
+## 2026-10-23 — P1 live map
+- Compose stack (Postgres 18.4, ingest, dashboard; LLM profile) with pinned images. SQL migrations,
+  daily-partitioned positions, latest-state upserts via COPY, hourly retention.
+- Bug found by the DB tests: non-autocommit psycopg connections turned `conn.transaction()` blocks
+  into savepoints inside an implicit transaction, so `ON COMMIT DROP` temp tables leaked between
+  polls. Fixed by using autocommit connections with explicit transaction blocks.
+- Live: ~3,500 airline aircraft kept per poll; dashboard serves them with ETag/304 and dead-reckons
+  airborne planes between polls. Replay mode drives an end-to-end CI smoke test.
+- Compose `llm` reused the P0 model download: `llm-model` found the blob by hash and hard-linked it.

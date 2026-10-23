@@ -1,15 +1,17 @@
-# conus-live
+# at_tracker
 
-Starting point for a live CONUS flight dashboard. Nothing is wired together yet.
+Live map of airline traffic over the continental US, with a focus panel and a chat pane backed by a
+local LLM. Work in progress (milestone P0: environment and source spikes).
 
-    collector/testing.py   OpenSky auth + one bounded /states/all fetch, with the
-                           plan written out in the module docstring
-    dashboard/             Flask app serving the D3 map, currently on a mock fleet
-                           (see dashboard/README.md to run it)
+    dashboard/   Flask app serving the D3 map, currently on a mock fleet
+                 (see dashboard/README.md to run it)
+    ingest/      OpenSky client, airline-only ingest filter, source probe, synthetic test fixtures
+    scripts/     dev setup (Docker Engine + NVIDIA toolkit) and LLM smoke test
+    docs/        ADRs, per-milestone plans, worklog
 
-Intended shape: the collector polls OpenSky and writes snapshots to a store; the
-dashboard's mock Fleet is swapped for an adapter that reads from that store. The
-HTTP API and browser code stay as they are.
+Only airline traffic is stored: private, business and military aircraft are dropped in memory
+before anything is written (docs/adr/0002-airline-traffic-only.md). Test fixtures for aircraft data
+are synthetic (ingest/tests/fixtures/README.md); no recorded OpenSky data is committed.
 
-This directory is meant to be moved to other hardware. Do not add machine-specific
-paths, and keep credentials out of the tree.
+This directory is meant to be moved to other hardware. Do not add machine-specific paths, and keep
+credentials out of the tree (copy `.env.example` to `.env`).

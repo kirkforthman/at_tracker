@@ -1,0 +1,171 @@
+[
+ {
+  "icaoId": "KATL",
+  "receiptTime": "2026-10-23T16:56:56.368Z",
+  "obsTime": 1792774320,
+  "reportTime": "2026-10-23T17:00:00.000Z",
+  "temp": 21.1,
+  "dewp": 5,
+  "wdir": 100,
+  "wspd": 8,
+  "visib": "10+",
+  "altim": 1024.8,
+  "slp": 1024.3,
+  "qcField": 12,
+  "metarType": "METAR",
+  "rawOb": "METAR KATL 231652Z 10008KT 10SM CLR 21/05 A3026 RMK AO2 SLP243 T02110050 $",
+  "lat": 33.6297,
+  "lon": -84.4422,
+  "elev": 309,
+  "name": "Atlanta/Hartsfield-Jackson Intl, GA, US",
+  "cover": "CLR",
+  "clouds": [],
+  "fltCat": "VFR"
+ },
+ {
+  "icaoId": "KDEN",
+  "receiptTime": "2026-10-23T16:57:03.091Z",
+  "obsTime": 1792774380,
+  "reportTime": "2026-10-23T17:00:00.000Z",
+  "temp": 22.2,
+  "dewp": 2.2,
+  "wdir": 200,
+  "wspd": 22,
+  "visib": "10+",
+  "altim": 1013.3,
+  "slp": 1005.7,
+  "qcField": 4,
+  "metarType": "METAR",
+  "rawOb": "METAR KDEN 231653Z 20022KT 10SM FEW090 FEW140 FEW220 22/02 A2992 RMK AO2 PK WND 20033/1603 SLP057 T02220022",
+  "lat": 39.8466,
+  "lon": -104.6562,
+  "elev": 1656,
+  "name": "Denver Intl, CO, US",
+  "cover": "FEW",
+  "clouds": [
+   {
+    "cover": "FEW",
+    "base": 9000
+   },
+   {
+    "cover": "FEW",
+    "base": 14000
+   },
+   {
+    "cover": "FEW",
+    "base": 22000
+   }
+  ],
+  "fltCat": "VFR"
+ },
+ {
+  "icaoId": "KIAD",
+  "receiptTime": "2026-10-23T16:54:19.853Z",
+  "obsTime": 1792774320,
+  "reportTime": "2026-10-23T17:00:00.000Z",
+  "temp": 15,
+  "dewp": 3.9,
+  "wdir": "VRB",
+  "wspd": 4,
+  "visib": "10+",
+  "altim": 1027.9,
+  "slp": 1027.9,
+  "qcField": 4,
+  "metarType": "METAR",
+  "rawOb": "METAR KIAD 231652Z VRB04KT 10SM SCT045 15/04 A3035 RMK AO2 SLP279 T01500039",
+  "lat": 38.9348,
+  "lon": -77.4473,
+  "elev": 90,
+  "name": "Washington/Dulles Intl, VA, US",
+  "cover": "SCT",
+  "clouds": [
+   {
+    "cover": "SCT",
+    "base": 4500
+   }
+  ],
+  "fltCat": "VFR"
+ },
+ {
+  "icaoId": "KJFK",
+  "receiptTime": "2026-10-23T16:54:21.068Z",
+  "obsTime": 1792774260,
+  "reportTime": "2026-10-23T17:00:00.000Z",
+  "temp": 14.4,
+  "dewp": -2.2,
+  "wdir": 30,
+  "wspd": 6,
+  "visib": "10+",
+  "altim": 1028.9,
+  "slp": 1028.6,
+  "qcField": 4,
+  "metarType": "METAR",
+  "rawOb": "METAR KJFK 231651Z 03006KT 10SM FEW060 14/M02 A3038 RMK AO2 SLP286 T01441022",
+  "lat": 40.6392,
+  "lon": -73.7639,
+  "elev": 3,
+  "name": "New York/JF Kennedy Intl, NY, US",
+  "cover": "FEW",
+  "clouds": [
+   {
+    "cover": "FEW",
+    "base": 6000
+   }
+  ],
+  "fltCat": "VFR"
+ },
+ {
+  "icaoId": "KORD",
+  "receiptTime": "2026-10-23T16:54:21.204Z",
+  "obsTime": 1792774260,
+  "reportTime": "2026-10-23T17:00:00.000Z",
+  "temp": 20,
+  "dewp": 7.2,
+  "wdir": 170,
+  "wspd": 4,
+  "visib": "10+",
+  "altim": 1027.2,
+  "slp": 1027.2,
+  "qcField": 4,
+  "metarType": "METAR",
+  "rawOb": "METAR KORD 231651Z 17004KT 10SM CLR 20/07 A3033 RMK AO2 SLP272 T02000072",
+  "lat": 41.9602,
+  "lon": -87.9316,
+  "elev": 202,
+  "name": "Chicago/O'Hare Intl, IL, US",
+  "cover": "CLR",
+  "clouds": [],
+  "fltCat": "VFR"
+ },
+ {
+  "icaoId": "KSFO",
+  "receiptTime": "2026-10-23T17:19:06.648Z",
+  "obsTime": 1792775760,
+  "reportTime": "2026-10-23T17:16:00.000Z",
+  "temp": 16.7,
+  "dewp": 12.8,
+  "wdir": 10,
+  "wspd": 4,
+  "visib": "10+",
+  "altim": 1018.7,
+  "qcField": 4,
+  "metarType": "SPECI",
+  "rawOb": "SPECI KSFO 231716Z 01004KT 10SM FEW014 BKN027 17/13 A3008 RMK AO2 T01670128",
+  "lat": 37.6196,
+  "lon": -122.3656,
+  "elev": 2,
+  "name": "San Francisco Intl, CA, US",
+  "cover": "BKN",
+  "clouds": [
+   {
+    "cover": "FEW",
+    "base": 1400
+   },
+   {
+    "cover": "BKN",
+    "base": 2700
+   }
+  ],
+  "fltCat": "MVFR"
+ }
+]

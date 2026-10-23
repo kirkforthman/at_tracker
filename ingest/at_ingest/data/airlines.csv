@@ -1,0 +1,78 @@
+icao,iata,name,kind
+AAL,AA,American Airlines,passenger
+DAL,DL,Delta Air Lines,passenger
+UAL,UA,United Airlines,passenger
+SWA,WN,Southwest Airlines,passenger
+JBU,B6,JetBlue,passenger
+ASA,AS,Alaska Airlines,passenger
+HAL,HA,Hawaiian Airlines,passenger
+NKS,NK,Spirit Airlines,passenger
+FFT,F9,Frontier Airlines,passenger
+AAY,G4,Allegiant Air,passenger
+SCX,SY,Sun Country Airlines,passenger
+MXY,MX,Breeze Airways,passenger
+VXP,XP,Avelo Airlines,passenger
+SKW,OO,SkyWest Airlines,regional
+ENY,MQ,Envoy Air,regional
+RPA,YX,Republic Airways,regional
+EDV,9E,Endeavor Air,regional
+JIA,OH,PSA Airlines,regional
+PDT,PT,Piedmont Airlines,regional
+ASH,YV,Mesa Airlines,regional
+QXE,QX,Horizon Air,regional
+GJS,G7,GoJet Airlines,regional
+AWI,ZW,Air Wisconsin,regional
+UCA,C5,CommutAir,regional
+FDX,FX,FedEx Express,cargo
+UPS,5X,UPS Airlines,cargo
+GTI,5Y,Atlas Air,cargo
+ABX,GB,ABX Air,cargo
+ATN,8C,Air Transport International,cargo
+CKS,K4,Kalitta Air,cargo
+PAC,PO,Polar Air Cargo,cargo
+AJT,M6,Amerijet International,cargo
+CLX,CV,Cargolux,cargo
+ACA,AC,Air Canada,passenger
+JZA,QK,Jazz Aviation,regional
+ROU,RV,Air Canada Rouge,passenger
+WJA,WS,WestJet,passenger
+TSC,TS,Air Transat,passenger
+POE,PD,Porter Airlines,passenger
+AMX,AM,Aeromexico,passenger
+VOI,Y4,Volaris,passenger
+VIV,VB,VivaAerobus,passenger
+CMP,CM,Copa Airlines,passenger
+AVA,AV,Avianca,passenger
+LAN,LA,LATAM Airlines,passenger
+BAW,BA,British Airways,passenger
+VIR,VS,Virgin Atlantic,passenger
+DLH,LH,Lufthansa,passenger
+AFR,AF,Air France,passenger
+KLM,KL,KLM,passenger
+IBE,IB,Iberia,passenger
+EIN,EI,Aer Lingus,passenger
+SWR,LX,Swiss,passenger
+AUA,OS,Austrian Airlines,passenger
+SAS,SK,SAS,passenger
+FIN,AY,Finnair,passenger
+ICE,FI,Icelandair,passenger
+TAP,TP,TAP Air Portugal,passenger
+THY,TK,Turkish Airlines,passenger
+UAE,EK,Emirates,passenger
+QTR,QR,Qatar Airways,passenger
+ETD,EY,Etihad Airways,passenger
+ELY,LY,El Al,passenger
+AIC,AI,Air India,passenger
+ANA,NH,All Nippon Airways,passenger
+JAL,JL,Japan Airlines,passenger
+KAL,KE,Korean Air,passenger
+AAR,OZ,Asiana Airlines,passenger
+CPA,CX,Cathay Pacific,passenger
+EVA,BR,EVA Air,passenger
+CAL,CI,China Airlines,passenger
+CCA,CA,Air China,passenger
+CES,MU,China Eastern,passenger
+CSN,CZ,China Southern,passenger
+SIA,SQ,Singapore Airlines,passenger
+QFA,QF,Qantas,passenger
+ANZ,NZ,Air New Zealand,passenger

@@ -13,7 +13,7 @@ Use the most exact form available:
 
 | Kind | How it's pinned | Where |
 |---|---|---|
-| Python packages | `==` for every package, including transitive dependencies | `ingest/requirements.txt`, `dashboard/requirements.txt` (`pyproject.toml` keeps ranges for compatibility) |
+| Python packages | `==` for every package, including transitive dependencies | `ingest/requirements.txt` (runtime), `ingest/requirements-dev.txt` (+ dev tools), `dashboard/requirements.txt` (`pyproject.toml` keeps ranges for compatibility) |
 | Python interpreter | Exact patch version | CI `python-version`; container base images from P1 |
 | GitHub Actions | Commit SHA, with the version in a comment | `.github/workflows/*.yml` |
 | Container images | Version tag **and** digest (`image:tag@sha256:…`) | `compose.yaml` from P1 |
@@ -34,6 +34,9 @@ deliberately rather than at random.
 | Python | 3.14.4 |
 | llama.cpp server | `ghcr.io/ggml-org/llama.cpp:server-cuda-b11804@sha256:490d8cd8000203a3ab8fdfce14ef931e2aa85affd4dd4447bcc75f299f00fd9a` (build 11804, commit `c7fc50941`) |
 | Model | `ggml-org/gpt-oss-20b-GGUF` revision `15dcfc7e7c608c6161507211ed43c5b590801b4b`, `gpt-oss-20b-MXFP4.gguf`, SHA-256 `27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901` |
+| Postgres (P1) | `postgres:18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636` |
+| Python base image (P1) | `python:3.14.4-slim@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727` |
+| psycopg / gunicorn (P1) | 3.3.6 / 26.2.0 |
 | actions/checkout | v7.0.1 (`3d3c42e5aac5ba805825da76410c181273ba90b1`) |
 | actions/setup-python | v7.0.0 (`5fda3b95a4ea91299a34e894583c3862153e4b97`) |
 | Docker Engine / Compose (host, not pinned) | 29.9.2 / 5.6.1 |

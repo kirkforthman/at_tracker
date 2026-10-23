@@ -1,16 +1,16 @@
-"""CONUS dashboard: Flask entry point.
+"""CONUS dashboard: Flask entry point. Reads the ingest database; never calls external APIs.
 
-Run:  flask --app app run --debug      (or: python app.py)
+Run:  docker compose up -d        (or locally: flask --app app run --debug --port 8080)
 """
 import time
 
+import psycopg
 from flask import Flask, abort, jsonify, render_template, request
 
+from conus import chat, store
 from conus.airports import AIRPORTS
-from conus.fleet import AIRLINES, Fleet
 
 app = Flask(__name__)
-fleet = Fleet(seed=42, count=70, motion=True)
 
 
 @app.get("/")
@@ -25,26 +25,43 @@ def api_airports():
 
 @app.get("/api/airlines")
 def api_airlines():
-    return jsonify(AIRLINES)
+    return jsonify(store.airlines())
 
 
 @app.get("/api/aircraft")
 def api_aircraft():
-    return jsonify({"ts": time.time(), "motion": fleet.motion, "aircraft": fleet.snapshot()})
+    """Snapshot of aircraft heard from recently. ETag = latest poll id, so unchanged polls cost a 304."""
+    poll = store.latest_poll()
+    etag = f'"poll-{poll["id"]}"' if poll else None
+    if etag and request.headers.get("If-None-Match") == etag:
+        return "", 304, {"ETag": etag}
+    body = {"ts": time.time(), "poll_ts": poll["ts"] if poll else None, "aircraft": store.snapshot()}
+    resp = jsonify(body)
+    if etag:
+        resp.headers["ETag"] = etag
+    return resp
 
 
-@app.get("/api/aircraft/<ac_id>")
-def api_aircraft_one(ac_id):
-    a = fleet.get(ac_id)
+@app.get("/api/aircraft/<ident>")
+def api_aircraft_one(ident):
+    a = store.aircraft(ident)
     if a is None:
         abort(404)
     return jsonify(a)
 
 
-@app.post("/api/motion")
-def api_motion():
-    body = request.get_json(silent=True) or {}
-    return jsonify({"motion": fleet.set_motion(body.get("enabled", True))})
+@app.get("/api/health")
+def api_health():
+    try:
+        poll = store.latest_poll()
+    except psycopg.Error as e:  # report, don't raise: this endpoint exists to describe failures
+        return jsonify({"db_ok": False, "error": type(e).__name__}), 503
+    return jsonify({
+        "db_ok": True,
+        "last_poll_age_s": round(time.time() - poll["ts"]) if poll else None,
+        "last_poll_kept": poll["kept"] if poll else None,
+        "credits_remaining": poll["credits_remaining"] if poll else None,
+    })
 
 
 @app.post("/api/chat")
@@ -52,7 +69,7 @@ def api_chat():
     body = request.get_json(silent=True) or {}
     q = str(body.get("q", ""))[:500]
     selected = body.get("selected") if isinstance(body.get("selected"), dict) else None
-    return jsonify(fleet.answer(q, selected))
+    return jsonify(chat.answer(q, selected))
 
 
 if __name__ == "__main__":

@@ -74,10 +74,11 @@
   .world { fill: var(--land-other); stroke: var(--land-other-line); stroke-width: 0.8px; vector-effect: non-scaling-stroke; pointer-events: none; }
   .state { fill: var(--land); stroke: var(--state-line); stroke-width: 1px; vector-effect: non-scaling-stroke; }
   .state:hover { fill: var(--land-hover); }
-  .airport circle { fill: var(--panel); stroke: var(--airport); stroke-width: 1.4; cursor: pointer; }
+  .airport circle.dot { fill: var(--panel); stroke: var(--airport); stroke-width: 1.4; cursor: pointer; }
+  .airport circle.hit { fill: transparent; stroke: none; cursor: pointer; }  /* larger click target */
   .airport text { font-size: 11px; font-weight: 600; fill: var(--airport); pointer-events: none;
                   paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
-  .airport.selected circle { stroke: var(--select); stroke-width: 2.5; }
+  .airport.selected circle.dot { stroke: var(--select); stroke-width: 2.5; }
   .plane { cursor: pointer; }
   .plane polygon { stroke: var(--marker-edge); stroke-width: 1; }
   .plane.ground polygon { fill: var(--plane-ground); }
@@ -85,7 +86,10 @@
   .plane.selected .halo { fill: none; stroke: var(--select); stroke-width: 2; }
   .plane .halo { display: none; }
   .plane.selected .halo { display: block; }
-  .route { fill: none; stroke: var(--select); stroke-width: 1.2px; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .fresh { padding: 1px 7px; border-radius: 999px; color: #22262c; }
+  .fresh.ok { background: var(--plane-flight); }
+  .fresh.warn { background: #f0c24b; }
+  .fresh.stale { background: var(--plane-ground); }
 
   .map-hud {
     position: absolute; left: 16px; bottom: 14px;
@@ -132,6 +136,8 @@
   .picker .pi .cs { font-family: var(--mono); font-weight: 600; min-width: 70px; }
   .picker .pi .meta { color: var(--muted); }
   .picker .sw { width: 9px; height: 9px; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: var(--plane-ground); flex: none; }
+  .picker .sw.flight { background: var(--plane-flight); }
+  .picker .sw.apt { clip-path: none; border-radius: 50%; background: none; border: 1.5px solid var(--airport); width: 7px; height: 7px; }
   .tip {
     position: absolute; pointer-events: none; display: none;
     font: 12px var(--mono); background: #22262c; color: #f0f2f4; border: 1px solid var(--border-soft);
@@ -196,7 +202,8 @@
     <div class="map-hud">
       <span id="zoomLabel">zoom 1.0×</span>
       <button id="resetView" title="Reset view">reset</button>
-      <label><input type="checkbox" id="motion" checked> motion</label>
+      <label><input type="checkbox" id="pause"> pause</label>
+      <span id="fresh" class="fresh">no data yet</span>
       <span id="counts"></span>
     </div>
     <div class="legend">
@@ -235,7 +242,6 @@
     airports: "{{ url_for('api_airports') }}",
     airlines: "{{ url_for('api_airlines') }}",
     aircraft: "{{ url_for('api_aircraft') }}",
-    motion: "{{ url_for('api_motion') }}",
     chat: "{{ url_for('api_chat') }}"
   };
 </script>

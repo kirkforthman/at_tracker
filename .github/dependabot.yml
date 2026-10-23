@@ -1,0 +1,15 @@
+# Proposes version bumps as PRs, which must pass CI before merging (main is protected).
+# Keeps exact pins from going stale without giving up on pinning. See docs/adr/0003.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: pip
+    directories: [/ingest, /dashboard]
+    schedule:
+      interval: monthly
+    groups:
+      python:
+        patterns: ["*"]

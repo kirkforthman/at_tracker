@@ -15,7 +15,7 @@ def sv(icao24, callsign):
 
 
 def test_allowlist_loads_core_carriers():
-    assert {"UAL", "DAL", "AAL", "SWA", "SKW", "FDX", "UPS"} <= ALLOW
+    assert {"UAL", "DAL", "AAL", "SWA", "SKW", "FDX", "UPS", "KAP", "JSX"} <= ALLOW
 
 
 def test_allowlist_excludes_military_and_charter_prefixes():

@@ -40,3 +40,8 @@ Short dated entries: what was done, what the agent got wrong, what was corrected
 - Live: ~3,500 airline aircraft kept per poll; dashboard serves them with ETag/304 and dead-reckons
   airborne planes between polls. Replay mode drives an end-to-end CI smoke test.
 - Compose `llm` reused the P0 model download: `llm-model` found the blob by hash and hard-linked it.
+
+## 2026-10-24 — P1 24 h run
+- 961 polls in 24 h, 0 errors, 0 HTTP 429, 3,836 credits used. No off-allowlist or US-military
+  rows in any table. Raw positions measured at ~0.35 GB/day (2.23 M rows); steady state
+  ~0.7–1.05 GB with 48 h retention. SVG rendering kept. **P1 complete.**

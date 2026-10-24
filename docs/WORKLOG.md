@@ -44,4 +44,5 @@ Short dated entries: what was done, what the agent got wrong, what was corrected
 ## 2026-10-24 — P1 24 h run
 - 961 polls in 24 h, 0 errors, 0 HTTP 429, 3,836 credits used. No off-allowlist or US-military
   rows in any table. Raw positions measured at ~0.35 GB/day (2.23 M rows); steady state
-  ~0.7–1.05 GB with 48 h retention. SVG rendering kept. **P1 complete.**
+  ~0.7–1.05 GB with 48 h retention. SVG rendering kept. Top unmatched prefixes reviewed (ASI, VAR, NDU, VJA
+  confirmed non-passenger; stay excluded). **P1 complete.**

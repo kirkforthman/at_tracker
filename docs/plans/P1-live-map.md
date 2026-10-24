@@ -34,5 +34,7 @@ Decisions:
   on daily partitions, 2–3 partitions exist at once: ~0.7–1.05 GB steady state, inside the estimate.
 - 8,021 distinct aircraft and 25,695 callsigns over the day; `aircraft_state` 8,063 rows (12 MB).
 - Partition drops not yet exercised live (first one due 2026-10-26 00:00 UTC); covered by `test_store.py`.
+- Allowlist review of the largest unmatched prefixes: EJA, CXK, LXJ (business jet), CAP and
+  ASI, VAR, NDU, VJA confirmed as not public passenger service and stay excluded. No allowlist change.
 
 **P1 complete.**

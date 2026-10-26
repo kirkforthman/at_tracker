@@ -33,7 +33,8 @@ Decisions:
 - Raw positions: 2.23 M rows/day, ~157 B/row including indexes, ≈ 0.35 GB/day. With 48 h retention
   on daily partitions, 2–3 partitions exist at once: ~0.7–1.05 GB steady state, inside the estimate.
 - 8,021 distinct aircraft and 25,695 callsigns over the day; `aircraft_state` 8,063 rows (12 MB).
-- Partition drops not yet exercised live (first one due 2026-10-26 00:00 UTC); covered by `test_store.py`.
+- First live partition drop at 2026-10-26 00:21 UTC: `positions_20261023` (88 MB) dropped, oldest
+  position now 2026-10-24 00:00 UTC, positions total 700 → 634 MB, polling uninterrupted.
 - Allowlist review of the largest unmatched prefixes: EJA, CXK, LXJ (business jet), CAP and
   ASI, VAR, NDU, VJA confirmed as not public passenger service and stay excluded. No allowlist change.
 

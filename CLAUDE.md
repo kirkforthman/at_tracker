@@ -5,7 +5,7 @@ Portfolio project: deterministic ingest + relational/graph data, agentic chat ov
 
 ## Layout
 
-    dashboard/   Flask + D3 UI (still on the mock fleet until P1)
+    dashboard/   Flask + D3 UI, reads Postgres (read-only)
     ingest/      Python worker: OpenSky, FAA NAS Status, METAR, enrichment
     scripts/     dev setup and smoke tests
     docs/adr/    decisions;  docs/plans/  one plan per milestone;  docs/WORKLOG.md
